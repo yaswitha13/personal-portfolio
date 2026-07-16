@@ -1,74 +1,225 @@
-// Scroll Animation
-
-const sections = document.querySelectorAll("section");
-
-window.addEventListener("scroll", () => {
-    sections.forEach(section => {
-        const sectionTop = section.getBoundingClientRect().top;
-
-        if (sectionTop < window.innerHeight - 100) {
-            section.classList.add("show");
-        }
-    });
-});
-
-sections.forEach(section => {
-    section.classList.add("fade");
-});
-
-
+// =========================
 // Typing Animation
+// =========================
 
 const roles = [
     "Java Developer",
-    "Computer Science Student",
+    "Software Developer",
     "Problem Solver",
-    "Software Developer"
+    "Computer Science Student",
+    "Web Developer"
 ];
 
 let roleIndex = 0;
 let charIndex = 0;
+let isDeleting = false;
 
-const typingElement = document.getElementById("typing");
+const typing = document.getElementById("typing");
 
-if (typingElement) {
+function typeEffect() {
 
-    function type() {
+    if (!typing) return;
 
-        if (charIndex < roles[roleIndex].length) {
+    const current = roles[roleIndex];
 
-            typingElement.textContent += roles[roleIndex].charAt(charIndex);
+    if (!isDeleting) {
 
-            charIndex++;
+        typing.textContent = current.substring(0, charIndex++);
 
-            setTimeout(type, 100);
+        if (charIndex > current.length) {
 
-        } else {
+            isDeleting = true;
 
-            setTimeout(erase, 1500);
+            setTimeout(typeEffect, 1500);
+
+            return;
 
         }
-    }
 
-    function erase() {
+    } else {
 
-        if (charIndex > 0) {
+        typing.textContent = current.substring(0, charIndex--);
 
-            typingElement.textContent =
-                roles[roleIndex].substring(0, charIndex - 1);
+        if (charIndex < 0) {
 
-            charIndex--;
-
-            setTimeout(erase, 50);
-
-        } else {
+            isDeleting = false;
 
             roleIndex = (roleIndex + 1) % roles.length;
 
-            setTimeout(type, 500);
-
         }
+
     }
 
-    type();
+    setTimeout(typeEffect, isDeleting ? 50 : 100);
+
+}
+
+typeEffect();
+
+
+// =========================
+// Scroll Reveal Animation
+// =========================
+
+const observer = new IntersectionObserver((entries)=>{
+
+entries.forEach(entry=>{
+
+if(entry.isIntersecting){
+
+entry.target.classList.add("show");
+
+}
+
+});
+
+},{
+threshold:0.2
+});
+
+document.querySelectorAll("section").forEach(section=>{
+
+section.classList.add("hidden");
+
+observer.observe(section);
+
+});
+
+
+// =========================
+// Active Navbar
+// =========================
+
+const sections=document.querySelectorAll("section");
+const navLinks=document.querySelectorAll(".navbar a");
+
+window.addEventListener("scroll",()=>{
+
+let current="";
+
+sections.forEach(section=>{
+
+const sectionTop=section.offsetTop-150;
+
+if(pageYOffset>=sectionTop){
+
+current=section.getAttribute("id");
+
+}
+
+});
+
+navLinks.forEach(link=>{
+
+link.classList.remove("active");
+
+if(link.getAttribute("href")==="#"+current){
+
+link.classList.add("active");
+
+}
+
+});
+
+});
+
+
+// =========================
+// Counter Animation
+// =========================
+
+const counters=document.querySelectorAll(".stat-card h2");
+
+const counterObserver=new IntersectionObserver((entries)=>{
+
+entries.forEach(entry=>{
+
+if(entry.isIntersecting){
+
+const counter=entry.target;
+
+const target=parseFloat(counter.innerText);
+
+const suffix=counter.innerText.replace(/[0-9.]/g,'');
+
+let count=0;
+
+const speed=40;
+
+const update=()=>{
+
+count+=target/speed;
+
+if(count<target){
+
+counter.innerText=Math.ceil(count)+suffix;
+
+requestAnimationFrame(update);
+
+}else{
+
+counter.innerText=target+suffix;
+
+}
+
+};
+
+update();
+
+counterObserver.unobserve(counter);
+
+}
+
+});
+
+});
+
+counters.forEach(counter=>{
+
+counterObserver.observe(counter);
+
+});
+
+
+// =========================
+// Smooth Scroll
+// =========================
+
+document.querySelectorAll('a[href^="#"]').forEach(anchor=>{
+
+anchor.addEventListener("click",function(e){
+
+e.preventDefault();
+
+document.querySelector(this.getAttribute("href")).scrollIntoView({
+
+behavior:"smooth"
+
+});
+
+});
+
+});
+
+
+// =========================
+// Floating Profile Image
+// =========================
+
+const image=document.querySelector(".image-box");
+
+if(image){
+
+let up=true;
+
+setInterval(()=>{
+
+image.style.transform=up
+?"translateY(-10px)"
+:"translateY(0px)";
+
+up=!up;
+
+},1500);
+
 }
